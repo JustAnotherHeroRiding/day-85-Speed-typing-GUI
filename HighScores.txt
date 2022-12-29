@@ -1,0 +1,2 @@
+RawCpm,RealCpm,WPM
+374.00,309.00,61.80

@@ -4,6 +4,7 @@ import tkinter.ttk as ttk
 from ttkthemes import ThemedTk
 import sv_ttk
 import math
+from time import sleep
 
 with open("3000mostcommon.txt") as file:
     words = file.readlines()
@@ -80,6 +81,15 @@ sv_ttk.set_theme("dark")
  
         
 def start_timer():
+    global CORRECTWORDS,MISTYPEDWORDS,CORRECT,WRONG,random_words
+    CORRECTWORDS = []
+    MISTYPEDWORDS = []
+    CORRECT = 0
+    WRONG = 0
+    random_words = random.sample(words, 500)
+    the_word.config(text=random_words[wordindex:wordindex+3])
+    wordblock.config(text=random_words[wordindex:wordindex+20])
+    
     typeline.focus()
     
     minute =  60
@@ -87,9 +97,18 @@ def start_timer():
     
     
 def start_timer_event(event):
+    global CORRECTWORDS,MISTYPEDWORDS,CORRECT,WRONG,random_words
+    CORRECTWORDS = []
+    MISTYPEDWORDS = []
+    CORRECT = 0
+    WRONG = 0
+    random_words = random.sample(words, 500)
+    the_word.config(text=random_words[wordindex:wordindex+3])
+    wordblock.config(text=random_words[wordindex:wordindex+20])
+    
     typeline.focus()
 
-    minute =  5
+    minute =  60
     count_down(minute)
     
     
@@ -110,10 +129,13 @@ def count_down(count):
         correct_cpm = [len(word) for word in CORRECTWORDS]
         #Just divide by the amount of seconds then multiply by 60 to get cpm 
         #Or dont multiply for per second counts
+        with open("HighScores.txt", 'a') as file:
+            file.write(f"\n{(int(sum(raw_cpm))):.2f},{(int(sum(correct_cpm))):.2f},{(int(sum(correct_cpm))/5):.2f}")
         print(f"RAW CPM:{(int(sum(raw_cpm))):.2f}")
         print(f"CORRECTED CPM:{(int(sum(correct_cpm))):.2f}")
         print(f"WPM:{(int(sum(correct_cpm))/5):.2f}")
         the_word.config(text=f"Correctly typed:{CORRECT}:Mistypes:{WRONG}")
+        wordblock.config(text=f"RAW CPM:{(int(sum(raw_cpm))):.2f}\nCORRECTED CPM:{(int(sum(correct_cpm))):.2f}\nWPM:{(int(sum(correct_cpm))/5):.2f}")
         reset_timer()
         
         
@@ -123,12 +145,11 @@ def count_down(count):
         
         
 def reset_timer():
-    global random_words
     window.after_cancel(timer)
     canvas.itemconfig(timer_text, text="00:00")
     #Need to make this update the above list aswell
+    #Did it in the start function
     #Need to reset the word label on timer start too
-    random_words = random.sample(words, 500)
         
 
 
@@ -143,18 +164,27 @@ title_label.pack(side=tk.TOP,anchor='n', padx=15)
 Frame = tk.Frame(window, background="#1b1b1b", height=20,pady=20)
 Frame.pack(side=tk.TOP, fill=tk.X)
 
-the_word = tk.Label(Frame, text=random_words[wordindex:wordindex+3], justify=tk.CENTER, foreground=OFFWHITE,
+the_word = tk.Label(Frame, text="The current and the next 2 words will appear here.", justify=tk.CENTER, foreground=OFFWHITE,
                   font=("Roboto", 25), borderwidth=5, background=DARKEST, activebackground="#1b1b1b",fg="black")
 the_word.config(wraplength=500)
 the_word.pack(side=tk.TOP,pady=10)
 
-wordblock = tk.Label(Frame, text=random_words[wordindex:wordindex+20], justify=tk.CENTER, foreground=OFFWHITE,
+wordblock = tk.Label(Frame, text="Welcome to the SpeedTyper,press Enter or Click the start button to begin", justify=tk.CENTER, foreground=OFFWHITE,
                   font=("Roboto", 25), borderwidth=5, background=DARKEST, activebackground="#1b1b1b",fg="black")
 wordblock.config(wraplength=500)
 wordblock.pack(side=tk.TOP,pady=10)
 
+
+
+#if canvas.itemcget(timer_text,'text') == "00:00":
 start_button = ttk.Button(text="Start", command=start_timer)
 start_button.pack(side=tk.TOP, anchor="n")
+
+start_button = ttk.Button(text="Reset", command=reset_timer)
+start_button.pack(side=tk.RIGHT, anchor="n")
+
+
+
 
 
 
@@ -205,3 +235,14 @@ window.mainloop()
 #Next steps
 #Add timer which will start counting for the words
 #1 minute then post the cpm,wpm and correctly typed and wrongly typed words
+#DONE
+
+
+#To do-
+#Make the experience smoother
+#Add a reset button to reset the words,correct and wrongs lists and restart timer from 0
+#Maybe put all of this inside the start timer function
+#Start button resets the counts and lists and will only give you wpm for the minute you typed in
+
+#Need to fix multiple presses of the button
+
